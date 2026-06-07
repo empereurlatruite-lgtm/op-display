@@ -7,6 +7,8 @@ brief a single operation ("op").
 Static HTML + CDN three.js — **no build step, no npm**, same convention as
 `../propaganda/` and `../publisheur/web/`.
 
+**Repo:** <https://github.com/empereurlatruite-lgtm/op-display>
+
 ## Run it
 
 ES module scripts need to be served over http(s) (not opened as a `file://` path),
