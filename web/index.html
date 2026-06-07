@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Op Display — Hex Board</title>
+  <link rel="stylesheet" href="./style.css" />
+
+  <!-- three.js via CDN ES module import map (no build tool) -->
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://unpkg.com/three@0.169.0/build/three.module.js",
+      "three/addons/": "https://unpkg.com/three@0.169.0/examples/jsm/"
+    }
+  }
+  </script>
+</head>
+<body>
+  <canvas id="scene"></canvas>
+
+  <div id="panel">
+    <h1>Endless Shore — Op Board</h1>
+    <p id="meta" class="meta"></p>
+    <p class="hint">Click the hex to place. Drag to orbit, scroll to zoom.</p>
+
+    <div class="tools">
+      <button data-tool="marker" class="active">📍 Marker</button>
+      <button data-tool="label">🏷️ Label</button>
+      <button data-tool="arrow">➳ Arrow</button>
+    </div>
+
+    <label class="field">
+      Color
+      <input type="color" id="color" value="#e23b2e" />
+    </label>
+
+    <label class="field">
+      Label text
+      <input type="text" id="labelText" value="Objective" maxlength="24" />
+    </label>
+
+    <p id="status" class="status"></p>
+
+    <button id="clear" class="danger">Clear all</button>
+  </div>
+
+  <script type="module" src="./app.js"></script>
+</body>
+</html>

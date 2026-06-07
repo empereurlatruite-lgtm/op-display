@@ -1,0 +1,129 @@
+{
+  "hex": "EndlessShoreHex",
+  "displayName": "Endless Shore",
+  "shard": "Able (Live-1)",
+  "warNumber": 135,
+  "regionId": 20,
+  "labels": [
+    {
+      "text": "Balor's Crown",
+      "x": 0.67203,
+      "y": 0.2852
+    },
+    {
+      "text": "Battered Landing",
+      "x": 0.30552,
+      "y": 0.55011
+    },
+    {
+      "text": "Brackish Point",
+      "x": 0.303,
+      "y": 0.15477
+    },
+    {
+      "text": "Dannan Coast",
+      "x": 0.53792,
+      "y": 0.10088
+    },
+    {
+      "text": "Dearg's Fang",
+      "x": 0.59473,
+      "y": 0.36644
+    },
+    {
+      "text": "Enduring Wake",
+      "x": 0.20582,
+      "y": 0.61224
+    },
+    {
+      "text": "Iron Junction",
+      "x": 0.35953,
+      "y": 0.79567
+    },
+    {
+      "text": "Kelpie's Mane",
+      "x": 0.77604,
+      "y": 0.63521
+    },
+    {
+      "text": "Kelpie's Tail",
+      "x": 0.71943,
+      "y": 0.67487
+    },
+    {
+      "text": "Liegehearth",
+      "x": 0.30281,
+      "y": 0.45129
+    },
+    {
+      "text": "Merrow's Rest",
+      "x": 0.78933,
+      "y": 0.77108
+    },
+    {
+      "text": "Saltbrook Channel",
+      "x": 0.30376,
+      "y": 0.38163
+    },
+    {
+      "text": "S\u00eddhe Fall",
+      "x": 0.48439,
+      "y": 0.29702
+    },
+    {
+      "text": "The Dark Road",
+      "x": 0.83694,
+      "y": 0.49503
+    },
+    {
+      "text": "The Evil Eye",
+      "x": 0.70691,
+      "y": 0.45179
+    },
+    {
+      "text": "The North Star",
+      "x": 0.30252,
+      "y": 0.26164
+    },
+    {
+      "text": "The Old Jack Tar",
+      "x": 0.17979,
+      "y": 0.41211
+    },
+    {
+      "text": "The Overland",
+      "x": 0.57504,
+      "y": 0.79666
+    },
+    {
+      "text": "The Selkie Bluffs",
+      "x": 0.57922,
+      "y": 0.54059
+    },
+    {
+      "text": "The Styx",
+      "x": 0.46472,
+      "y": 0.63916
+    },
+    {
+      "text": "The Whispering Waves",
+      "x": 0.66085,
+      "y": 0.58012
+    },
+    {
+      "text": "Tuatha Watchpost",
+      "x": 0.85392,
+      "y": 0.55074
+    },
+    {
+      "text": "Wellchurch",
+      "x": 0.51463,
+      "y": 0.45945
+    },
+    {
+      "text": "Woodbind",
+      "x": 0.69931,
+      "y": 0.73367
+    }
+  ]
+}
