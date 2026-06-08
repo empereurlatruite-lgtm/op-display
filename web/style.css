@@ -118,7 +118,8 @@ html, body {
   background: none;
   cursor: pointer;
 }
-.field input[type="text"] {
+.field input[type="text"],
+.field select {
   flex: 1;
   min-width: 0;
   padding: 6px 8px;
@@ -127,6 +128,44 @@ html, body {
   background: #1c2630;
   border: 1px solid var(--line);
   border-radius: 5px;
+}
+
+.units-hint {
+  margin: 4px 0 6px;
+}
+
+/* Loader overlay — covers the canvas until the terrain is built + shaded, so
+   the blank->loaded pop (and first-frame shader compile) isn't seen. */
+#loader {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  background: #11161c;
+  color: var(--muted);
+  font-size: 14px;
+  transition: opacity 0.5s ease;
+}
+#loader.hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+.spinner {
+  width: 34px;
+  height: 34px;
+  border: 3px solid #2a3744;
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 0.9s linear infinite;
+}
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .status {

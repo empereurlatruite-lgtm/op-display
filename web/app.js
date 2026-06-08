@@ -1,8 +1,12 @@
 import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { buildHexTerrain } from "./terrain.js";
-import { normToWorld } from "./hex.js";
+import { normToWorld, HEX_WIDTH, HEX_DEPTH } from "./hex.js";
 import { createMarker, createLabel, createArrow, MarkerLayer } from "./markers.js";
+import { initWargame, wargame } from "./wargame.js";
+import { createUnitMesh, UnitLayer } from "./units.js";
+
+const UNIT_TOOLS = new Set(["squad", "boat", "tank"]);
 
 // ---- Scene / camera / renderer ---------------------------------------------
 const canvas = document.getElementById("scene");
@@ -38,14 +42,36 @@ scene.add(sun);
 
 // ---- The hex: 3D-elevated Endless Shore terrain (relief from the map) --------
 let hexTop = null; // raycast target; set once the terrain is built
-buildHexTerrain({ textureUrl: "./endless-shore.png" })
+const loaderEl = document.getElementById("loader");
+function hideLoader() {
+  loaderEl?.classList.add("hidden");
+}
+// Safety net: never leave the loader stuck if something hangs.
+const loaderTimeout = setTimeout(hideLoader, 8000);
+
+buildHexTerrain()
   .then(({ group, top }) => {
     scene.add(group);
     hexTop = top;
-    setStatus("Terrain loaded.");
+    setStatus("Map loaded.");
+    // Boot the Rust wargame engine (terrain queries + placement rules) so the
+    // Squad/Boat/Tank tools work. Failure is non-fatal — annotations still work.
+    initWargame().then((ok) => {
+      if (ok) setStatus("Engine ready — place markers or units.");
+    });
     return placeTownLabels(); // current Able town names, dropped onto the terrain
   })
-  .catch(() => setStatus("Failed to build terrain — check console."));
+  .then(() => {
+    // Reveal only after a couple of frames so the shaded terrain (its patched
+    // shader compiles on first render) is on screen before the fade-in.
+    clearTimeout(loaderTimeout);
+    requestAnimationFrame(() => requestAnimationFrame(hideLoader));
+  })
+  .catch(() => {
+    setStatus("Failed to build terrain — check console.");
+    clearTimeout(loaderTimeout);
+    hideLoader();
+  });
 
 // Live current-war town labels from the Able shard (saved snapshot).
 async function placeTownLabels() {
@@ -74,15 +100,18 @@ async function placeTownLabels() {
 }
 
 const markers = new MarkerLayer(scene);
+const units = new UnitLayer(scene);
 
 // ---- Interaction state -----------------------------------------------------
 const raycaster = new THREE.Raycaster();
 const pointer = new THREE.Vector2();
 let tool = "marker";
 let arrowStart = null; // first click point when drawing an arrow
+let losStart = null; // first click for a line-of-sight query
 
 const colorInput = document.getElementById("color");
 const labelInput = document.getElementById("labelText");
+const factionInput = document.getElementById("faction");
 const statusEl = document.getElementById("status");
 const metaEl = document.getElementById("meta");
 
@@ -101,13 +130,20 @@ document.querySelectorAll(".tools button").forEach((btn) => {
     btn.classList.add("active");
     tool = btn.dataset.tool;
     arrowStart = null;
-    setStatus(tool === "arrow" ? "Arrow: click the start point." : "");
+    losStart = null;
+    if (tool === "arrow") setStatus("Arrow: click the start point.");
+    else if (tool === "los") setStatus("Line of sight: click the observer.");
+    else if (UNIT_TOOLS.has(tool)) setStatus(`Click the hex to deploy a ${tool}.`);
+    else setStatus("");
   });
 });
 
 document.getElementById("clear").addEventListener("click", () => {
   markers.clear();
+  units.clear();
+  if (wargame.ready()) wargame.clear();
   arrowStart = null;
+  losStart = null;
   setStatus("Cleared.");
 });
 
@@ -140,6 +176,15 @@ function pickHex(event) {
 function placeAt(point) {
   const color = colorInput.value;
 
+  if (UNIT_TOOLS.has(tool)) {
+    placeUnit(tool, point);
+    return;
+  }
+  if (tool === "los") {
+    queryLineOfSight(point);
+    return;
+  }
+
   if (tool === "marker") {
     markers.add(createMarker(point, color));
     setStatus("Marker placed.");
@@ -157,6 +202,73 @@ function placeAt(point) {
       setStatus("Arrow placed.");
     }
   }
+}
+
+// World hit-point -> warapi-normalized [nx, ny] (inverse of normToWorld).
+function worldToNorm(point) {
+  return [point.x / HEX_WIDTH + 0.5, point.z / HEX_DEPTH + 0.5];
+}
+
+// Deploy a unit: the Rust engine validates terrain rules + occupancy; on success
+// we render a token on the surface, on failure we report why (e.g. tank on water).
+function placeUnit(kind, point) {
+  if (!wargame.ready()) {
+    setStatus("Engine not loaded — units unavailable.");
+    return;
+  }
+  const faction = factionInput?.value || "neutral";
+  const at = worldToNorm(point);
+  const res = wargame.place(kind, faction, at);
+  if (!res.ok) {
+    setStatus(`Can't deploy ${kind} here: ${res.error}.`);
+    return;
+  }
+  const unit = { id: res.id, kind, faction, pos: at, heading: 0 };
+  const mesh = createUnitMesh(unit);
+  mesh.position.copy(point);
+  units.add(mesh);
+  setStatus(`${faction} ${kind} deployed.`);
+}
+
+// Two-click line-of-sight query: the engine marches the height grid; we draw the
+// sight line green (clear) or red (blocked by terrain).
+function queryLineOfSight(point) {
+  if (!wargame.ready()) {
+    setStatus("Engine not loaded — line of sight unavailable.");
+    return;
+  }
+  if (!losStart) {
+    losStart = point.clone();
+    setStatus("Line of sight: click the target.");
+    return;
+  }
+  const from = worldToNorm(losStart);
+  const to = worldToNorm(point);
+  const res = wargame.lineOfSight(from, to);
+  const visible = !!res.visible;
+  markers.add(createSightLine(losStart, point, visible));
+  setStatus(visible ? "Line of sight: CLEAR." : "Line of sight: BLOCKED by terrain.");
+  losStart = null;
+}
+
+// A thin cylinder beats THREE.Line here — WebGL ignores line width, so a real
+// tube is what actually reads as a sight line. Green = clear, red = blocked.
+function createSightLine(a, b, visible) {
+  const lift = new THREE.Vector3(0, 0.14, 0);
+  const pa = a.clone().add(lift);
+  const pb = b.clone().add(lift);
+  const dir = new THREE.Vector3().subVectors(pb, pa);
+  const len = dir.length() || 0.001;
+  const geom = new THREE.CylinderGeometry(0.04, 0.04, len, 8);
+  const mat = new THREE.MeshStandardMaterial({
+    color: visible ? 0x49d17a : 0xe2453b,
+    emissive: visible ? 0x176b39 : 0x7a1816,
+    roughness: 0.5,
+  });
+  const mesh = new THREE.Mesh(geom, mat);
+  mesh.position.copy(pa).lerp(pb, 0.5);
+  mesh.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), dir.normalize());
+  return mesh;
 }
 
 // ---- Resize + render loop --------------------------------------------------

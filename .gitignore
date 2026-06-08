@@ -4,6 +4,9 @@ __pycache__/
 .venv/
 venv/
 
+# Rust
+engine/target/
+
 # OS / editor
 .DS_Store
 *.swp

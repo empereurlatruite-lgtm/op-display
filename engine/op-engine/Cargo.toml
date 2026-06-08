@@ -1,0 +1,18 @@
+[package]
+name = "op-engine"
+description = "Native CLI baker: PNG heightmap/texture -> compact terrain grid artifact"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[[bin]]
+name = "op-engine"
+path = "src/main.rs"
+
+[dependencies]
+opengine-core = { path = "../opengine-core" }
+serde_json = { workspace = true }
+image = { version = "0.25", default-features = false, features = ["png"] }
+clap = { version = "4", features = ["derive"] }
+anyhow = "1"

@@ -32,7 +32,7 @@ HEX_H = 1900
 HEX_W = 2197
 MAP = 16384
 SCALE = MAP / (HEX_H * 7)
-SIZE = 512            # tile zoom; smaller = more detail, more downloads
+SIZE = 256            # tile zoom; smaller = more detail, more downloads (256 ~= 2x sharper than 512)
 DS = SIZE // 128      # tiles are stored downscaled to 128px
 
 

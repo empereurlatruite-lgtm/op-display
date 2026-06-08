@@ -1,0 +1,15 @@
+[package]
+name = "opengine-core"
+description = "Shared core for op-display: hex/terrain math + wargame logic (native now, WASM later)"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[lib]
+# Pure logic + types. No filesystem, no image decoding, no CLI — so this crate
+# compiles unchanged to WASM in Phase 2. PNG decoding lives in `op-engine`.
+
+[dependencies]
+serde = { workspace = true }
+serde_json = { workspace = true }

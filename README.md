@@ -44,7 +44,46 @@ Then open <http://localhost:3003/>.
 | `web/app.js`     | Scene, camera, lights, OrbitControls, click→raycast placement. |
 | `web/hex.js`     | Hexagon geometry (6-segment cylinder = hex prism) + top-face helper. |
 | `web/markers.js` | Marker / label-sprite / arrow factories + a disposable layer. |
+| `web/baked.js`   | Loads the Rust-baked terrain grid into a THREE geometry (see Engine). |
+| `web/wargame.js` | Loads the wargame WASM + drives its placement engine (see Engine). |
+| `web/units.js`   | Squad / boat / tank token meshes + a disposable layer. |
 | `web/style.css`  | Fullscreen canvas + side panel styling. |
+
+## Engine (Rust)
+
+A small Rust workspace under [`engine/`](engine/) owns the terrain computation
+and the wargame logic:
+
+- **`opengine-core`** — hex/terrain math + the squad/boat/tank model.
+- **`op-engine`** — native CLI baker: heightmap → compact terrain grid
+  (`web/endless-shore-terrain.json`, committed) the web app loads at runtime.
+- **`opengine-wasm`** — the same core compiled to WebAssembly for the in-browser
+  unit planner (`web/wargame.wasm`, committed).
+
+Both artifacts are committed, so serving/deploying stays buildless.
+
+```bash
+cd engine
+cargo test                                   # core math + wargame
+# re-bake the terrain grid (only when source PNGs / params change):
+cargo run -p op-engine -- \
+  --height ../web/endless-shore-height.png \
+  --texture ../web/endless-shore.png \
+  --out ../web/endless-shore-terrain.json \
+  --seg-x 320 --seg-y 277 --relief 0.8
+./build-wasm.sh                              # rebuild web/wargame.wasm
+```
+
+**Units:** pick Squad / Boat / Tank and a faction, then click the hex — the Rust
+engine validates each placement against the terrain (inside the hex, boats need
+water, tanks can't climb cliffs, units can't overlap) and the browser renders a
+token. The **👁 Line of sight** tool takes two clicks and draws the sight line
+green (clear) or red (blocked by terrain), computed by the engine over the
+height grid.
+
+Load `?mode=js` to force the original in-browser procedural terrain instead of
+the baked grid — handy for side-by-side comparison. See
+[`engine/README.md`](engine/README.md) for details.
 
 ## Endless Shore wiring
 

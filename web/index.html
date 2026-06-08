@@ -19,6 +19,11 @@
 <body>
   <canvas id="scene"></canvas>
 
+  <div id="loader">
+    <div class="spinner"></div>
+    <p>Loading Endless Shore…</p>
+  </div>
+
   <div id="panel">
     <h1>Endless Shore — Op Board</h1>
     <p id="meta" class="meta"></p>
@@ -29,6 +34,23 @@
       <button data-tool="label">🏷️ Label</button>
       <button data-tool="arrow">➳ Arrow</button>
     </div>
+
+    <p class="hint units-hint">Units (placement validated by the engine):</p>
+    <div class="tools" id="unitTools">
+      <button data-tool="squad">🪖 Squad</button>
+      <button data-tool="boat">⛴ Boat</button>
+      <button data-tool="tank">🛡 Tank</button>
+      <button data-tool="los">👁 Line of sight</button>
+    </div>
+
+    <label class="field">
+      Faction
+      <select id="faction">
+        <option value="warden">Warden</option>
+        <option value="colonial">Colonial</option>
+        <option value="neutral">Neutral</option>
+      </select>
+    </label>
 
     <label class="field">
       Color

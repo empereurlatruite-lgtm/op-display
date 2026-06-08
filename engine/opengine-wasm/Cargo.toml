@@ -1,0 +1,13 @@
+[package]
+name = "opengine-wasm"
+description = "WASM ABI for the op-display wargame: drives opengine-core's Session from the browser"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+opengine-core = { path = "../opengine-core" }
